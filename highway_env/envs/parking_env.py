@@ -98,7 +98,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "controlled_vehicles": 1,
             
             #user defined configs from here
-            "otherParkedVehicles" : 0, # all slots will be parked with cars but one
+            "otherParkedVehicles" : 1, # all slots will be parked with cars but one
             "parkingSlots" : 6, # number of slots available on both sides
             "slotWidth": 4.0, # slot width  
             "slotLength": 8, # length of slot
