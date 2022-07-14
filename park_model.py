@@ -5,12 +5,11 @@ from stable_baselines3 import SAC, HerReplayBuffer
 import argparse
 
 env = gym.make("parking-v0")
-model_name = "samplerun"
-steps = 1000
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', help='learn/run', type=str)
-parser.add_argument('--steps', help='Height of captcha image', type=int)
+parser.add_argument('--steps', help='steps to learn/run', type=int)
+parser.add_argument('--filename', help='name of the file if in learn mode', type=str)
 
 args = parser.parse_args()
 
@@ -19,6 +18,12 @@ if args.mode is None:
     exit(1)
 
 mode = args.mode
+
+if args.filename == None:
+    print("specify filename to store/run the model")
+    exit(1)
+
+model_name = args.filename
 
 if args.steps == None:
     print("Steps not specified running default for 10000")
