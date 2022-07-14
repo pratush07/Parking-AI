@@ -4,28 +4,27 @@ from stable_baselines3 import SAC, HerReplayBuffer
 import time
 
 env = gym.make("parking-v0")
-model_name = "sac_angled_longduration_steering55_cappedspeed4_15k"
+model_name = "samplerun"
+steps = 1000
 
+her_kwargs = dict(n_sampled_goal=4, goal_selection_strategy='future', online_sampling=True, max_episode_length=100)
+model = SAC('MultiInputPolicy', env, replay_buffer_class=HerReplayBuffer,
+            replay_buffer_kwargs=her_kwargs, verbose=1, buffer_size=int(1e6),
+            learning_rate=1e-3,
+            gamma=0.95, batch_size=1024, tau=0.05,
+            policy_kwargs=dict(net_arch=[512, 512, 512]))
+model.learn(steps)
+model.save(model_name)
 
-
-# her_kwargs = dict(n_sampled_goal=4, goal_selection_strategy='future', online_sampling=True, max_episode_length=100)
-# model = SAC('MultiInputPolicy', env, replay_buffer_class=HerReplayBuffer,
-#             replay_buffer_kwargs=her_kwargs, verbose=1, buffer_size=int(1e6),
-#             learning_rate=1e-3,
-#             gamma=0.95, batch_size=1024, tau=0.05,
-#             policy_kwargs=dict(net_arch=[512, 512, 512]))
-# model.learn(int(20000))
-# model.save(model_name)
-
-model = SAC.load(model_name, env=env)
-for _ in range(100):
-    obs, done = env.reset(), False
-    while not done:
-        # time.sleep(1)
-        env.render()
-        action, _ = model.predict(obs, deterministic=True)
-        print(action)
-        obs, reward, done, info = env.step(action)
+# model = SAC.load(model_name, env=env)
+# for _ in range(100):
+#     obs, done = env.reset(), False
+#     while not done:
+#         # time.sleep(1)
+#         env.render()
+#         action, _ = model.predict(obs, deterministic=True)
+#         print(action)
+#         obs, reward, done, info = env.step(action)
 
 # for _ in range(100):
 #     env.render()
