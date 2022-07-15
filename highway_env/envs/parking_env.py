@@ -7,7 +7,7 @@ from highway_env.envs.common.abstract import AbstractEnv
 from highway_env.envs.common.observation import MultiAgentObservation, observation_factory
 from highway_env.road.lane import StraightLane, LineType
 from highway_env.road.road import Road, RoadNetwork
-from highway_env.vehicle.objects import Landmark
+from highway_env.vehicle.objects import Landmark, Obstacle
 import math
 
 class GoalEnv(Env):
@@ -91,20 +91,22 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "simulation_frequency": 15,
             "policy_frequency": 5,
             "duration": 300,
-            "screen_width": 400,
-            "screen_height": 300,
+            "screen_width": 600,
+            "screen_height": 400,
             "centering_position": [0.5, 0.5],
             "scaling": 7,
             "controlled_vehicles": 1,
             
             #user defined configs from here
             "otherParkedVehicles" : 1, # all slots will be parked with cars but one
-            "parkingSlots" : 6, # number of slots available on both sides
-            "slotWidth": 4.0, # slot width  
-            "slotLength": 8, # length of slot
+            "obstacleBox": 1, # obstacle box around the parking lot
+            "gridSizeX": 6,# number of slots available on both sides
+            "corridorWidth": 10, # manaevouring empty area in between 2 rows
+            "gridSpotWidth": 4.0, # slot width  
+            "gridSpotLength": 8, # length of slot
             "initialEgoPosition": [10,0], # if none will be set to [0,0].
             "initialEgoHeading": 1.5, # vehicle heading. if None will be set to random, otherwise will be 2 * pi * initialHeading
-            "goalSpotNumber": 1,  # fixing goal spot. None means random.
+            "goalSpotNumber": 0,  # fixing goal spot. None means random.
             "laneAngle": 90 # 90 degrees means vertical.
         })
         return config
@@ -137,13 +139,14 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         :param spots: number of spots in the parking
         """
         net = RoadNetwork()
-        spots = self.config["parkingSlots"]
-        width = self.config["slotWidth"]
-        length = self.config["slotLength"]
+        spots = self.config["gridSizeX"]
+        width = self.config["gridSpotWidth"]
+        length = self.config["gridSpotLength"]
         
         lt = (LineType.CONTINUOUS, LineType.CONTINUOUS)
         x_offset = 0
-        y_offset = 10
+        y_offset = self.config["corridorWidth"]
+
         for k in range(spots):
             x = (k - spots // 2) * (width + x_offset) - width / 2
             # straight lane
@@ -188,15 +191,47 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         # create dummy vehicles only if flag is on
         if self.config["otherParkedVehicles"]:
             self._create_dummy_vehicles(lane)
+        
+        # if obstacle flag is on
+        if self.config["obstacleBox"]:
+            self._create_obstacles()
     
     def _create_dummy_vehicles(self, goal_spot: StraightLane) -> None:
-        length = self.config["slotLength"]
+        length = self.config["gridSpotLength"]
         self.dummy_vehicles = []
         for spot in self.road.network.lanes_list():
             if not goal_spot == spot:
                 vehicle = self.action_type.vehicle_class(self.road, spot.position(length/2,0), spot.heading, 0)
                 self.road.vehicles.append(vehicle)
                 self.dummy_vehicles.append(vehicle)
+
+    def _create_obstacles(self) -> None:
+        #Create row of obstacles at the bottom of parking grid
+        extendOffsetX = 3
+        extendOffsetY = 6
+
+        xGridBottomRowObstacleOffset = -(self.config["gridSizeX"]/2 + extendOffsetX) * self.config["gridSpotWidth"]
+        if self.config["gridSizeX"]%2 == 0:
+            xGridBottomRowObstacleOffset -= self.config["gridSpotWidth"]/2
+
+        yBottomRowObstaclePosition = self.config["gridSpotLength"] + self.config["corridorWidth"]/2 + extendOffsetY
+
+        for i in range(self.config["gridSizeX"] + (extendOffsetX*2)):
+            obstacle = Obstacle(self.road, [i*self.config["gridSpotWidth"] + xGridBottomRowObstacleOffset, yBottomRowObstaclePosition], 0, 0)
+            self.road.objects.append(obstacle)
+
+
+        #Create row of obstacles at the top of parking grid
+        xGridTopRowObstacleOffset = -(self.config["gridSizeX"]/2 + extendOffsetX) * self.config["gridSpotWidth"]
+        if self.config["gridSizeX"]%2 == 0:
+            xGridTopRowObstacleOffset -= self.config["gridSpotWidth"]/2
+
+        yTopRowObstaclePosition = - (self.config["gridSpotLength"] + self.config["corridorWidth"]/2 + extendOffsetY)
+
+        for i in range(self.config["gridSizeX"] + (extendOffsetX * 2)):
+            obstacle = Obstacle(self.road, [i*self.config["gridSpotWidth"] + xGridTopRowObstacleOffset, yTopRowObstaclePosition], math.pi, 0)
+            self.road.objects.append(obstacle)
+
 
     def compute_reward(self, achieved_goal: np.ndarray, desired_goal: np.ndarray, info: dict, p: float = 0.5) -> float:
         """
@@ -218,11 +253,11 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             return result
 
         # rewarding for speed below 3
-        if abs(self.vehicle.speed) < 4:
-            result += 0.1
-        else:
-            # penalize for high speed
-            result -= 0.2
+        # if abs(self.vehicle.speed) < 4:
+        #     result += 0.1
+        # else:
+        #     # penalize for high speed
+        #     result -= 0.2
         
         # if the vehicle might collide in trajectory time steps ahead, penalize
         if self.config["otherParkedVehicles"]:
@@ -239,9 +274,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             print("### crash occured" + str(result + self.config["collision_reward"]))
             return result + self.config["collision_reward"]
         
-        # elif result > -self.config["success_goal_reward"]:
-        #     print("@@@" + str(result + 10))
-        #     return result + 10
+        elif result > -self.config["success_goal_reward"]:
+            print("### vehicle parked " + str(result + 10))
+            return result + 10
         
         print( "***" + str(result))
         print("speed was " + str(self.vehicle.speed))
