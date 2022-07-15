@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from datetime import datetime
 from gym import Env
 from gym.envs.registration import register
 import numpy as np
@@ -9,6 +10,7 @@ from highway_env.road.lane import StraightLane, LineType
 from highway_env.road.road import Road, RoadNetwork
 from highway_env.vehicle.objects import Landmark, Obstacle
 import math
+import csv
 
 class GoalEnv(Env):
     """
@@ -56,6 +58,12 @@ class ParkingEnv(AbstractEnv, GoalEnv):
 
     Credits to Munir Jojo-Verge for the idea and initial implementation.
     """
+
+    episode_ctr = -1
+    file_name = "learning_stats"
+    file_writer = None
+    total_reward = 0
+
 
     # For parking env with GrayscaleObservation, the env need
     # this PARKING_OBS to calculate the reward and the info.
@@ -129,8 +137,14 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         return info
 
     def _reset(self):
+        if self.episode_ctr == 0:
+            file_open = open(self.file_name+"_"+str(int(datetime.now().timestamp())), 'w')
+            self.file_writer = csv.writer(file_open)
+
         self._create_road()
         self._create_vehicles()
+
+        self.episode_ctr += 1
 
     def _create_road(self) -> None:
         """
@@ -285,8 +299,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
     def _reward(self, action: np.ndarray) -> float:
         obs = self.observation_type_parking.observe()
         obs = obs if isinstance(obs, tuple) else (obs,)
-        return sum(self.compute_reward(agent_obs['achieved_goal'], agent_obs['desired_goal'], {})
+        self.total_reward = sum(self.compute_reward(agent_obs['achieved_goal'], agent_obs['desired_goal'], {})
                      for agent_obs in obs)
+        return self.total_reward
 
     def _is_success(self, achieved_goal: np.ndarray, desired_goal: np.ndarray) -> bool:
         return self.compute_reward(achieved_goal, desired_goal, {}) > -self.config["success_goal_reward"]
@@ -298,6 +313,23 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         obs = self.observation_type_parking.observe()
         obs = obs if isinstance(obs, tuple) else (obs,)
         success = all(self._is_success(agent_obs['achieved_goal'], agent_obs['desired_goal']) for agent_obs in obs)
+
+        # write to csv only if it is terminal
+        if time or crashed or success:
+            reason = "NA"
+            print("crashed" + str(crashed))
+            print("time" + str(time))
+            print("success" + str(success))
+
+            if crashed:
+                reason = "CRASHED"
+            elif time:
+                reason = "ELAPSED"
+            elif success:
+                reason = "SUCCESS"
+            
+            self.file_writer.writerow([self.episode_ctr, self.total_reward, success, reason])
+
         return time or crashed or success
 
 

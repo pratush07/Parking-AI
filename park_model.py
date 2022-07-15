@@ -1,8 +1,11 @@
 from ast import arg
+from datetime import datetime
+from time import time
 import gym
 import highway_env
 from stable_baselines3 import SAC, HerReplayBuffer
 import argparse
+import time
 
 env = gym.make("parking-v0")
 
@@ -39,16 +42,18 @@ if mode == 'learn':
                 gamma=0.95, batch_size=1024, tau=0.05,
                 policy_kwargs=dict(net_arch=[512, 512, 512]))
     model.learn(steps)
-    model.save(model_name)
+    model.save(model_name+"_"+str(steps)+str(int(datetime.now().timestamp())))
 else:
     model = SAC.load(model_name, env=env)
     for _ in range(steps):
         obs, done = env.reset(), False
         while not done:
             env.render()
+            # time.sleep(1)
             action, _ = model.predict(obs, deterministic=True)
             print(action)
             obs, reward, done, info = env.step(action)
+
 
 
 env.close()
