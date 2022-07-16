@@ -68,10 +68,7 @@ df = pd.read_csv('learning_stats.csv')
 figure = plt.gcf()
 figure.set_size_inches(18, 13)
 
-# f(x) plot code
 ax = figure.add_subplot(2, 2, 1)
-# for F,_,_,_ in iter_list:
-    # ax.semilogy(F)
 ax.plot(df['steps'], df['rewards'])
 
 plt.title("Rewards vs Steps", fontsize=16)

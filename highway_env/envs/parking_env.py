@@ -99,7 +99,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "steering_range": np.deg2rad(45),
             "simulation_frequency": 15,
             "policy_frequency": 5,
-            "duration": 300,
+            "duration": 100,
             "screen_width": 600,
             "screen_height": 400,
             "centering_position": [0.5, 0.5],
@@ -116,7 +116,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "initialEgoPosition": [10,0], # if none will be set to [0,0].
             "initialEgoHeading": 1.5, # vehicle heading. if None will be set to random, otherwise will be 2 * pi * initialHeading
             "goalSpotNumber": 0,  # fixing goal spot. None means random.
-            "laneAngle": 90 # 90 degrees means vertical.
+            "laneAngle": 20 # 90 degrees means vertical.
         })
         return config
 
@@ -172,8 +172,8 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             
             else:
             # lane at angle
-                net.add_lane("a", "b", StraightLane([x, y_offset], [x+3, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
-                net.add_lane("b", "c", StraightLane([x-3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
+                net.add_lane("a", "b", StraightLane([x, y_offset], [x-3, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
+                net.add_lane("b", "c", StraightLane([x+3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
 
         self.road = Road(network=net,
                          np_random=self.np_random,
