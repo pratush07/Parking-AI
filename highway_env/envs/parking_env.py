@@ -61,6 +61,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
 
     episode_ctr = -1
     file_name = "learning_stats"
+    file_open = None
     file_writer = None
     total_reward = 0
 
@@ -138,8 +139,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
 
     def _reset(self):
         if self.episode_ctr == 0:
-            file_open = open(self.file_name+"_"+str(int(datetime.now().timestamp())), 'w')
-            self.file_writer = csv.writer(file_open)
+            self.file_open = open(self.file_name + ".csv", 'w')
+            self.file_writer = csv.writer(self.file_open)
+            self.file_writer.writerow(["steps", "rewards", "success", "reason"])
 
         self._create_road()
         self._create_vehicles()
@@ -331,6 +333,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             self.file_writer.writerow([self.episode_ctr, self.total_reward, success, reason])
 
         return time or crashed or success
+
+    def terminate(self):
+        self.file_open.close()
 
 
 class ParkingEnvActionRepeat(ParkingEnv):

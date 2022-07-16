@@ -6,6 +6,11 @@ import highway_env
 from stable_baselines3 import SAC, HerReplayBuffer
 import argparse
 import time
+import matplotlib.pyplot as plt
+import pandas as pd
+
+plt.rc('font', size=18)
+plt.rcParams['figure.constrained_layout.use'] = True
 
 env = gym.make("parking-v0")
 
@@ -42,7 +47,8 @@ if mode == 'learn':
                 gamma=0.95, batch_size=1024, tau=0.05,
                 policy_kwargs=dict(net_arch=[512, 512, 512]))
     model.learn(steps)
-    model.save(model_name+"_"+str(steps)+str(int(datetime.now().timestamp())))
+    model.save(model_name+"_"+str(steps)+"_"+str(int(datetime.now().timestamp())))
+
 else:
     model = SAC.load(model_name, env=env)
     for _ in range(steps):
@@ -54,6 +60,23 @@ else:
             print(action)
             obs, reward, done, info = env.step(action)
 
+env.terminate()
 
+# plot training/run graphs
+df = pd.read_csv('learning_stats.csv')
+
+figure = plt.gcf()
+figure.set_size_inches(18, 13)
+
+# f(x) plot code
+ax = figure.add_subplot(2, 2, 1)
+# for F,_,_,_ in iter_list:
+    # ax.semilogy(F)
+ax.plot(df['steps'], df['rewards'])
+
+plt.title("Rewards vs Steps", fontsize=16)
+ax.set_xlabel('Steps')
+ax.set_ylabel('Total Rewards')
+plt.show()
 
 env.close()
