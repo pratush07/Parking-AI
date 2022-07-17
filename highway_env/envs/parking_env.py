@@ -105,7 +105,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "steering_range": np.deg2rad(45),
             "simulation_frequency": 15,
             "policy_frequency": 5,
-            "duration": 100,
+            "duration": 150,
             "screen_width": 600,
             "screen_height": 400,
             "centering_position": [0.5, 0.5],
@@ -121,8 +121,8 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "gridSpotLength": 8, # length of slot
             "initialEgoPosition": [10,0], # if none will be set to [0,0].
             "initialEgoHeading": 1.5, # vehicle heading. if None will be set to random, otherwise will be 2 * pi * initialHeading
-            "goalSpotNumber": 0,  # fixing goal spot. None means random.
-            "laneAngle": 20 # 90 degrees means vertical.
+            "goalSpotNumber": 2,  # fixing goal spot. None means random.
+            "laneAngle": 90 # 90 degrees means vertical.
         })
         return config
 
