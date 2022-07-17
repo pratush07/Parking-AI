@@ -62,18 +62,37 @@ else:
 
 env.terminate()
 
-# plot training/run graphs
-df = pd.read_csv('learning_stats.csv')
+# plot training/run episode graphs
+df = pd.read_csv(env.file_name_episode + ".csv")
 
 figure = plt.gcf()
 figure.set_size_inches(18, 13)
 
 ax = figure.add_subplot(2, 2, 1)
-ax.plot(df['steps'], df['rewards'])
+ax.plot(df['episodes'], df['rewards'])
 
-plt.title("Rewards vs Steps", fontsize=16)
-ax.set_xlabel('Steps')
+plt.title("Total Rewards vs Episodes", fontsize=16)
+ax.set_xlabel('Episodes')
 ax.set_ylabel('Total Rewards')
-plt.show()
+plt.savefig(model_name+"_"+str(steps)+"_episodes" + '.png', dpi=200, bbox_inches="tight")
+
+# plot training/run steps graphs
+df2 = pd.read_csv(env.file_name_steps + ".csv")
+figure.clear(True) 
+ax.cla()
+ax = figure.add_subplot(2, 1, 1)
+ax.plot(df2['steps'], df2['rewards'])
+
+ax.set_title("Rewards vs Steps", fontsize=16)
+ax.set_xlabel('Steps')
+ax.set_ylabel('Rewards')
+
+ax = figure.add_subplot(2, 1, 2)
+ax.plot(df2['steps'], df2['velocity'])
+ax.set_title("Velocity vs Steps", fontsize=16)
+ax.set_xlabel('Steps')
+ax.set_ylabel('Velocity')
+
+plt.savefig(model_name+"_"+str(steps)+"_steps" + '.png', dpi=200, bbox_inches="tight")
 
 env.close()

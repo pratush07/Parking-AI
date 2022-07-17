@@ -60,11 +60,15 @@ class ParkingEnv(AbstractEnv, GoalEnv):
     """
 
     episode_ctr = -1
-    file_name = "learning_stats"
-    file_open = None
-    file_writer = None
     total_reward = 0
+    file_name_episode = "learning_episode_stats"
+    file_open_episode = None
+    file_writer_episode = None
 
+    steps_ctr = 0
+    file_name_steps = "learning_steps_stats"
+    file_open_steps = None
+    file_writer_steps = None
 
     # For parking env with GrayscaleObservation, the env need
     # this PARKING_OBS to calculate the reward and the info.
@@ -139,9 +143,15 @@ class ParkingEnv(AbstractEnv, GoalEnv):
 
     def _reset(self):
         if self.episode_ctr == 0:
-            self.file_open = open(self.file_name + ".csv", 'w')
-            self.file_writer = csv.writer(self.file_open)
-            self.file_writer.writerow(["steps", "rewards", "success", "reason"])
+            # open episode files
+            self.file_open_episode = open(self.file_name_episode + ".csv", 'w')
+            self.file_writer_episode = csv.writer(self.file_open_episode)
+            self.file_writer_episode.writerow(["episodes", "rewards", "success", "reason"])
+
+            #open steps files
+            self.file_open_steps = open(self.file_name_steps + ".csv", 'w')
+            self.file_writer_steps = csv.writer(self.file_open_steps)
+            self.file_writer_steps.writerow(["steps", "rewards", "velocity"])
 
         self._create_road()
         self._create_vehicles()
@@ -193,7 +203,6 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             vehicle_heading = 2*np.pi*self.config["initialEgoHeading"]
 
         for i in range(self.config["controlled_vehicles"]):
-            print('vehicle heading ->' + str(vehicle_heading))
             vehicle = self.action_type.vehicle_class(self.road, vehicle_position, vehicle_heading, 0)            
             self.road.vehicles.append(vehicle)
             self.controlled_vehicles.append(vehicle)
@@ -290,12 +299,16 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             print("### crash occured" + str(result + self.config["collision_reward"]))
             return result + self.config["collision_reward"]
         
-        elif result > -self.config["success_goal_reward"]:
-            print("### vehicle parked " + str(result + 10))
-            return result + 10
+        # elif result > -self.config["success_goal_reward"]:
+        #     print("### vehicle parked " + str(result + 10))
+        #     return result + 10
         
-        print( "***" + str(result))
-        print("speed was " + str(self.vehicle.speed))
+        # print( "***" + str(result))
+        # print("speed was " + str(self.vehicle.speed))
+
+        self.file_writer_steps.writerow([self.steps_ctr, result, self.vehicle.speed])
+        self.steps_ctr += 1
+
         return result
 
     def _reward(self, action: np.ndarray) -> float:
@@ -319,10 +332,6 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         # write to csv only if it is terminal
         if time or crashed or success:
             reason = "NA"
-            print("crashed" + str(crashed))
-            print("time" + str(time))
-            print("success" + str(success))
-
             if crashed:
                 reason = "CRASHED"
             elif time:
@@ -330,12 +339,14 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             elif success:
                 reason = "SUCCESS"
             
-            self.file_writer.writerow([self.episode_ctr, self.total_reward, success, reason])
+            self.file_writer_episode.writerow([self.episode_ctr, self.total_reward, success, reason])
 
         return time or crashed or success
 
     def terminate(self):
-        self.file_open.close()
+        self.file_open_episode.close()
+        self.file_open_steps.close()
+        print("last step " + str(self.steps_ctr))
 
 
 class ParkingEnvActionRepeat(ParkingEnv):
