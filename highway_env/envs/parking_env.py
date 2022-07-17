@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from datetime import datetime
+from pickle import FALSE
 from gym import Env
 from gym.envs.registration import register
 import numpy as np
@@ -70,6 +71,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
     file_open_steps = None
     file_writer_steps = None
 
+    is_new_episode = False
     # For parking env with GrayscaleObservation, the env need
     # this PARKING_OBS to calculate the reward and the info.
     # Bug fixed by Mcfly(https://github.com/McflyWZX)
@@ -151,12 +153,13 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             #open steps files
             self.file_open_steps = open(self.file_name_steps + ".csv", 'w')
             self.file_writer_steps = csv.writer(self.file_open_steps)
-            self.file_writer_steps.writerow(["steps", "rewards", "velocity"])
+            self.file_writer_steps.writerow(["steps", "rewards", "velocity", "new_episode"])
 
         self._create_road()
         self._create_vehicles()
 
         self.episode_ctr += 1
+        self.is_new_episode = True
 
     def _create_road(self) -> None:
         """
@@ -306,7 +309,8 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         # print( "***" + str(result))
         # print("speed was " + str(self.vehicle.speed))
 
-        self.file_writer_steps.writerow([self.steps_ctr, result, self.vehicle.speed])
+        self.file_writer_steps.writerow([self.steps_ctr, result, self.vehicle.speed, self.is_new_episode])
+        self.is_new_episode = False
         self.steps_ctr += 1
 
         return result
@@ -346,8 +350,6 @@ class ParkingEnv(AbstractEnv, GoalEnv):
     def terminate(self):
         self.file_open_episode.close()
         self.file_open_steps.close()
-        print("last step " + str(self.steps_ctr))
-
 
 class ParkingEnvActionRepeat(ParkingEnv):
     def __init__(self):

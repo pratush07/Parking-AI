@@ -8,6 +8,7 @@ import argparse
 import time
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 plt.rc('font', size=18)
 plt.rcParams['figure.constrained_layout.use'] = True
@@ -69,7 +70,17 @@ figure = plt.gcf()
 figure.set_size_inches(18, 13)
 
 ax = figure.add_subplot(2, 2, 1)
-ax.plot(df['episodes'], df['rewards'])
+# parking success/crash/elapsed points
+df_elapsed = df[df['reason'] == 'ELAPSED']
+df_carshed = df[df['reason'] == 'CRASHED']
+df_success = df[df['reason'] == 'SUCCESS']
+ax.plot(df_elapsed['episodes'], df_elapsed['rewards'], marker='o',markerfacecolor="orange",linestyle = 'None',markersize=12)
+ax.plot(df_carshed['episodes'], df_carshed['rewards'], marker='o',markerfacecolor="red",linestyle = 'None',markersize=12)
+ax.plot(df_success['episodes'], df_success['rewards'], marker='o',markerfacecolor="green",linestyle = 'None',markersize=12)
+
+ax.plot(df['episodes'], df['rewards'],color='blue')
+
+plt.legend(["Elapsed", "Crashed", "Success"])
 
 plt.title("Total Rewards vs Episodes", fontsize=16)
 ax.set_xlabel('Episodes')
@@ -83,16 +94,24 @@ ax.cla()
 ax = figure.add_subplot(2, 1, 1)
 ax.plot(df2['steps'], df2['rewards'])
 
+df2_new_episode = df2[df2['new_episode'] == True]
+
+ax.plot(df2_new_episode['steps'],df2_new_episode['rewards'], marker='o',markerfacecolor="orange",linestyle = 'None',markersize=12)
+
+plt.legend(["Rewards", "New Episode"])
 ax.set_title("Rewards vs Steps", fontsize=16)
 ax.set_xlabel('Steps')
 ax.set_ylabel('Rewards')
 
 ax = figure.add_subplot(2, 1, 2)
 ax.plot(df2['steps'], df2['velocity'])
+
+ax.plot(df2_new_episode['steps'],df2_new_episode['velocity'], marker='o',markerfacecolor="orange",linestyle = 'None',markersize=12)
 ax.set_title("Velocity vs Steps", fontsize=16)
 ax.set_xlabel('Steps')
 ax.set_ylabel('Velocity')
 
+plt.legend(["Velocity", "New Episode"])
 plt.savefig(model_name+"_"+str(steps)+"_steps" + '.png', dpi=200, bbox_inches="tight")
 
 env.close()
