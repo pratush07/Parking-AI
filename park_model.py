@@ -41,6 +41,8 @@ else:
     steps = args.steps
 
 if mode == 'learn':
+    env.update_config({"totalSteps": steps})
+
     her_kwargs = dict(n_sampled_goal=4, goal_selection_strategy='future', online_sampling=True, max_episode_length=100)
     model = SAC('MultiInputPolicy', env, replay_buffer_class=HerReplayBuffer,
                 replay_buffer_kwargs=her_kwargs, verbose=1, buffer_size=int(1e6),
@@ -50,7 +52,21 @@ if mode == 'learn':
     model.learn(steps)
     model.save(model_name+"_"+str(steps)+"_"+str(int(datetime.now().timestamp())))
 
+elif mode == 'phased':
+    env.update_config({"phasedLearning": True, "totalSteps": steps})
+
+    her_kwargs = dict(n_sampled_goal=4, goal_selection_strategy='future', online_sampling=True, max_episode_length=100)
+    model = SAC('MultiInputPolicy', env, replay_buffer_class=HerReplayBuffer,
+                replay_buffer_kwargs=her_kwargs, verbose=1, buffer_size=int(1e6),
+                learning_rate=1e-3,
+                gamma=0.95, batch_size=1024, tau=0.05,
+                policy_kwargs=dict(net_arch=[512, 512, 512]))
+    model.learn(steps)
+    model.save(model_name+"_"+str(steps)+"_"+str(int(datetime.now().timestamp())))
+    
 else:
+    env.update_config({"totalSteps": steps})
+
     model = SAC.load(model_name, env=env)
     for _ in range(steps):
         obs, done = env.reset(), False

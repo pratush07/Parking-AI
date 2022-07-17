@@ -12,6 +12,7 @@ from highway_env.road.road import Road, RoadNetwork
 from highway_env.vehicle.objects import Landmark, Obstacle
 import math
 import csv
+from typing import Tuple
 
 class GoalEnv(Env):
     """
@@ -113,6 +114,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "controlled_vehicles": 1,
             
             #user defined configs from here
+            "totalSteps": 1000, # total duration for which the simulation will run
             "otherParkedVehicles" : 1, # all slots will be parked with cars but one
             "obstacleBox": 1, # obstacle box around the parking lot
             "gridSizeX": 6,# number of slots available on both sides
@@ -122,9 +124,23 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "initialEgoPosition": [0,0], # if none will be set to [0,0].
             "initialEgoHeading": 1.5, # vehicle heading. if None will be set to random, otherwise will be 2 * pi * initialHeading
             "goalSpotNumber": 5,  # fixing goal spot. None means random.
-            "laneAngle": 90 # 90 degrees means vertical.
+            "laneAngle": 90, # 90 degrees means vertical.
+            "phasedLearning": False, # if true will enable phased learning with changing angles.
         })
         return config
+    
+    def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, dict]:
+        obs, reward, terminal, info = super().step(action)
+
+        self.file_writer_steps.writerow([self.steps_ctr, reward, self.vehicle.speed, self.is_new_episode])
+        self.is_new_episode = False
+        self.steps_ctr += 1
+
+        return obs, reward, terminal, info
+    
+    def update_config(self,config) -> None:
+        if config:
+            super().configure(config)
 
     def define_spaces(self) -> None:
         """
@@ -178,15 +194,26 @@ class ParkingEnv(AbstractEnv, GoalEnv):
 
         for k in range(spots):
             x = (k - spots // 2) * (width + x_offset) - width / 2
-            # straight lane
-            if self.config['laneAngle'] == 90:
-                net.add_lane("a", "b", StraightLane([x, y_offset], [x, y_offset+length], width=width, line_types=lt))
-                net.add_lane("b", "c", StraightLane([x, -y_offset], [x, -y_offset-length], width=width, line_types=lt))
-            
+            if not self.config['phasedLearning']:
+                # straight lane
+                if self.config['laneAngle'] == 90:
+                    net.add_lane("a", "b", StraightLane([x, y_offset], [x, y_offset+length], width=width, line_types=lt))
+                    net.add_lane("b", "c", StraightLane([x, -y_offset], [x, -y_offset-length], width=width, line_types=lt))
+                
+                else:
+                # lane at angle
+                    net.add_lane("a", "b", StraightLane([x, y_offset], [x-3, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
+                    net.add_lane("b", "c", StraightLane([x+3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
             else:
-            # lane at angle
-                net.add_lane("a", "b", StraightLane([x, y_offset], [x-3, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
-                net.add_lane("b", "c", StraightLane([x+3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
+                # while total steps are less than half of total steps..construct straight roads
+                if self.steps_ctr <= self.config["totalSteps"]/2:
+                    net.add_lane("a", "b", StraightLane([x, y_offset], [x, y_offset+length], width=width, line_types=lt))
+                    net.add_lane("b", "c", StraightLane([x, -y_offset], [x, -y_offset-length], width=width, line_types=lt))
+                else:
+                    # lane at angle
+                    print("Changing lane angles")
+                    net.add_lane("a", "b", StraightLane([x, y_offset], [x-3, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
+                    net.add_lane("b", "c", StraightLane([x+3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
 
         self.road = Road(network=net,
                          np_random=self.np_random,
@@ -308,10 +335,6 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         
         # print( "***" + str(result))
         # print("speed was " + str(self.vehicle.speed))
-
-        self.file_writer_steps.writerow([self.steps_ctr, result, self.vehicle.speed, self.is_new_episode])
-        self.is_new_episode = False
-        self.steps_ctr += 1
 
         return result
 

@@ -8,18 +8,19 @@ env = gym.make("parking-v0")
 # print(env.config)
 
 observation = env.reset()
-print(observation)
+# print(observation)
 # print(env.action_space.high)
 # print(env.action_space.low)
 
 
-for _ in range(1):
+for _ in range(2):
     # env.render()
     img = env.render(mode="rgb_array")
-    plt.imsave('parking-originalview.png', img)
+    # plt.imsave('parking-originalview.png', img)
     action = env.action_space.sample()
+    # time.sleep(4)
     # print(action)
-    # observation, reward, done, info = env.step(action) # take a random action
+    observation, reward, done, info = env.step(action) # take a random action
     # print(observation)
     # print(info)
     # if done:
