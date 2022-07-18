@@ -121,9 +121,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "corridorWidth": 10, # manaevouring empty area in between 2 rows
             "gridSpotWidth": 4.0, # slot width  
             "gridSpotLength": 8, # length of slot
-            "initialEgoPosition": [0,0], # if none will be set to [0,0].
+            "initialEgoPosition": [10,0], # if none will be set to [0,0].
             "initialEgoHeading": 1.5, # vehicle heading. if None will be set to random, otherwise will be 2 * pi * initialHeading
-            "goalSpotNumber": 5,  # fixing goal spot. None means random.
+            "goalSpotNumber": 2,  # fixing goal spot. None means random.
             "laneAngle": 90, # 90 degrees means vertical.
             "phasedLearning": False, # if true will enable phased learning with changing angles.
         })
