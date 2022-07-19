@@ -114,7 +114,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "controlled_vehicles": 1,
             
             #user defined configs from here
-            "totalSteps": 1000, # total duration for which the simulation will run
+            "totalEpisodes": 10, # total duration for which the simulation will run
             "otherParkedVehicles" : 1, # all slots will be parked with cars but one
             "obstacleBox": 1, # obstacle box around the parking lot
             "gridSizeX": 6,# number of slots available on both sides
@@ -206,7 +206,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
                     net.add_lane("b", "c", StraightLane([x+3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
             else:
                 # while total steps are less than half of total steps..construct straight roads
-                if self.steps_ctr <= self.config["totalSteps"]/2:
+                if self.episode_ctr <= self.config["totalEpisodes"]/2:
                     net.add_lane("a", "b", StraightLane([x, y_offset], [x, y_offset+length], width=width, line_types=lt))
                     net.add_lane("b", "c", StraightLane([x, -y_offset], [x, -y_offset-length], width=width, line_types=lt))
                 else:
@@ -370,6 +370,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
 
         return time or crashed or success
 
+    # should be called at the end of simulation/learning manually.
     def terminate(self):
         self.file_open_episode.close()
         self.file_open_steps.close()

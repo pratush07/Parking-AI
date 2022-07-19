@@ -34,14 +34,13 @@ def run_and_save_model(steps, model_name, env, useHER = True):
     model.learn(steps)
     model.save(model_name+"_"+str(steps)+"_"+str(int(datetime.now().timestamp())))
 
-def run_simulation(model_name, env):
+def run_simulation(episodes, model_name, env):
     model = SAC.load(model_name, env=env)
-    for _ in range(steps):
+    for _ in range(episodes):
         obs, done = env.reset(), False
         while not done:
             env.render()
             action, _ = model.predict(obs, deterministic=True)
-            print(action)
             obs, _, done, _ = env.step(action)
 
 def plot_graphs():
@@ -101,9 +100,15 @@ env = gym.make("parking-v0")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', help='learn/run', type=str)
-parser.add_argument('--steps', help='steps/episodes to learn/run', type=int)
+parser.add_argument('--episodes', help='episodes to learn/run', type=int)
 parser.add_argument('--filename', help='name of the file if in learn mode', type=str)
 parser.add_argument('--her', help='Use HER',default=1, type=int)
+parser.add_argument('--saveGraphs',help='save graphs',default=1, type=int)
+
+parser.add_argument('--gridSizeX', help='number of grid slots in each row',default=6, type=int)
+parser.add_argument('--laneAngle', help='angle of the lane',default=90, type=int)
+parser.add_argument('--goalSpotNumber', help='fixed goal spot',default=1, type=int)
+parser.add_argument('--duration', help='duration of each episode',default=150, type=int)
 
 args = parser.parse_args()
 
@@ -119,31 +124,50 @@ if args.filename == None:
 
 model_name = args.filename
 
-if args.steps == None:
-    print("Steps not specified running default for 10000")
-    steps = 5000
+if args.episodes == None:
+    print("Episodes not specified running default for 10")
+    episodes = 10
 else:
-    steps = args.steps
+    episodes = args.episodes
 
 useHER = args.her
+gridSizeX = args.gridSizeX
+laneAngle = args.laneAngle
+goalSpotNumber = args.goalSpotNumber
+duration = args.duration
+saveGraphs = args.saveGraphs
+
+# number of episodes times duration of each episode will give us the number of steps. Only needed for learning
+steps = episodes * duration
+print("\nTotal steps to be run is : " + str(steps))
+
+common_env_config = {"totalEpisodes": episodes, "laneAngle": laneAngle, "gridSizeX": gridSizeX, "goalSpotNumber": goalSpotNumber, "duration": duration}
+print("running with the following configurations..")
+print("####\n" + str(common_env_config) + str("\n ####"))
 
 if mode == 'learn':
-    env.update_config({"totalSteps": steps})
+    env.update_config(common_env_config)
     run_and_save_model(steps, model_name,env,useHER)
 
 elif mode == 'phasedLearn':
-    env.update_config({"phasedLearning": True, "totalSteps": steps})
+    env_phased_config = common_env_config.copy()
+    env_phased_config['phasedLearning'] = True
+    env.update_config(env_phased_config)
     run_and_save_model(steps, model_name,env,useHER)
 
 elif mode == 'phasedRun':
-    env.update_config({"phasedLearning": True, "totalSteps": steps})
-    run_simulation(model_name, env)
+    env_phased_config = common_env_config.copy()
+    env_phased_config['phasedLearning'] = True
+    env.update_config(env_phased_config)
+    run_simulation(episodes,model_name, env)
 else:
-    env.update_config({"totalSteps": steps})
-    run_simulation(model_name, env)
+    env.update_config(common_env_config)
+    run_simulation(episodes, model_name, env)
 
 env.terminate()
 
-plot_graphs()
+if saveGraphs:
+    print("saving graphs")
+    plot_graphs()
 
 env.close()
