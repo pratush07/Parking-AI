@@ -103,6 +103,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "reward_weights": [1, 0.3, 0, 0, 0.02, 0.02],
             "success_goal_reward": 0.12,
             "collision_reward": -4,
+            "future_collision_reward": 0,
             "steering_range": np.deg2rad(45),
             "simulation_frequency": 15,
             "policy_frequency": 5,
@@ -321,7 +322,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
                 _,will_collide,_ = ego_vehicle._is_colliding(vehicle,10000)
                 if will_collide:
                     print("vehicle might collide with " + str(vehicle))
-                    result += -0.3
+                    result += self.config['future_collision_reward']
                 # print("distance from ego to " + str(vehicle))
                 # print(ego_vehicle.lane_distance_to(vehicle))
 
