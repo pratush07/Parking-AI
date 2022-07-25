@@ -109,7 +109,7 @@ parser.add_argument('--saveGraphs',help='save graphs',default=1, type=int)
 parser.add_argument('--timeDelay',help='timeDelay during run',default=None, type=float)
 
 parser.add_argument('--gridSizeX', help='number of grid slots in each row',default=6, type=int)
-parser.add_argument('--laneAngle', help='angle of the lane',default=90, type=int)
+parser.add_argument('--diagonalShift', help='angle of the lane',default=0, type=int)
 parser.add_argument('--goalSpotNumber', help='fixed goal spot',default=1, type=int)
 parser.add_argument('--duration', help='duration of each episode',default=150, type=int)
 
@@ -135,7 +135,7 @@ else:
 
 useHER = args.her
 gridSizeX = args.gridSizeX
-laneAngle = args.laneAngle
+diagonalShift = args.diagonalShift
 goalSpotNumber = args.goalSpotNumber
 duration = args.duration
 saveGraphs = args.saveGraphs
@@ -145,7 +145,7 @@ timeDelay = args.timeDelay
 steps = episodes * duration
 print("\nTotal steps to be run is : " + str(steps))
 
-common_env_config = {"totalEpisodes": episodes, "laneAngle": laneAngle, "gridSizeX": gridSizeX, "goalSpotNumber": goalSpotNumber, "duration": duration}
+common_env_config = {"totalEpisodes": episodes, "diagonalShift": diagonalShift, "gridSizeX": gridSizeX, "goalSpotNumber": goalSpotNumber, "duration": duration}
 print("running with the following configurations..")
 print("####\n" + str(common_env_config) + str("\n ####"))
 

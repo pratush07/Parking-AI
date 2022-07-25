@@ -125,7 +125,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "initialEgoPosition": [10,0], # if none will be set to [0,0].
             "initialEgoHeading": 1.5, # vehicle heading. if None will be set to random, otherwise will be 2 * pi * initialHeading
             "goalSpotNumber": 2,  # fixing goal spot. None means random.
-            "laneAngle": 90, # 90 degrees means vertical.
+            "diagonalShift": 0, # diagonal shift magnitude towards clockwise direction
             "phasedLearning": False, # if true will enable phased learning with changing angles.
         })
         return config
@@ -188,6 +188,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         spots = self.config["gridSizeX"]
         width = self.config["gridSpotWidth"]
         length = self.config["gridSpotLength"]
+        diagonal_shift = self.config['diagonalShift']
         
         lt = (LineType.CONTINUOUS, LineType.CONTINUOUS)
         x_offset = 0
@@ -196,15 +197,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         for k in range(spots):
             x = (k - spots // 2) * (width + x_offset) - width / 2
             if not self.config['phasedLearning']:
-                # straight lane
-                if self.config['laneAngle'] == 90:
-                    net.add_lane("a", "b", StraightLane([x, y_offset], [x, y_offset+length], width=width, line_types=lt))
-                    net.add_lane("b", "c", StraightLane([x, -y_offset], [x, -y_offset-length], width=width, line_types=lt))
-                
-                else:
-                # lane at angle
-                    net.add_lane("a", "b", StraightLane([x, y_offset], [x-3, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
-                    net.add_lane("b", "c", StraightLane([x+3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
+                # lane at diagonal shift 
+                net.add_lane("a", "b", StraightLane([x, y_offset], [x-diagonal_shift, y_offset+length], width=width, line_types=lt, align_lane_marking=(diagonal_shift!=0)))
+                net.add_lane("b", "c", StraightLane([x+diagonal_shift, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=(diagonal_shift!=0)))
             else:
                 # while total steps are less than half of total steps..construct straight roads
                 if self.episode_ctr <= self.config["totalEpisodes"]/2:
@@ -212,9 +207,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
                     net.add_lane("b", "c", StraightLane([x, -y_offset], [x, -y_offset-length], width=width, line_types=lt))
                 else:
                     # lane at angle
-                    print("Changing lane angles")
-                    net.add_lane("a", "b", StraightLane([x, y_offset], [x-3, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
-                    net.add_lane("b", "c", StraightLane([x+3, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
+                    print("Changing lane angle tp diagonal Shift " + str(diagonal_shift))
+                    net.add_lane("a", "b", StraightLane([x, y_offset], [x-diagonal_shift, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
+                    net.add_lane("b", "c", StraightLane([x+diagonal_shift, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
 
         self.road = Road(network=net,
                          np_random=self.np_random,
