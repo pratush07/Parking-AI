@@ -34,12 +34,14 @@ def run_and_save_model(steps, model_name, env, useHER = True):
     model.learn(steps)
     model.save(model_name+"_"+str(steps)+"_"+str(int(datetime.now().timestamp())))
 
-def run_simulation(episodes, model_name, env):
+def run_simulation(episodes, model_name, env, timeDelay=None):
     model = SAC.load(model_name, env=env)
     for _ in range(episodes):
         obs, done = env.reset(), False
         while not done:
             env.render()
+            if timeDelay:
+                time.sleep(timeDelay)
             action, _ = model.predict(obs, deterministic=True)
             obs, _, done, _ = env.step(action)
 
@@ -104,6 +106,7 @@ parser.add_argument('--episodes', help='episodes to learn/run', type=int)
 parser.add_argument('--filename', help='name of the file if in learn mode', type=str)
 parser.add_argument('--her', help='Use HER',default=1, type=int)
 parser.add_argument('--saveGraphs',help='save graphs',default=1, type=int)
+parser.add_argument('--timeDelay',help='timeDelay during run',default=None, type=float)
 
 parser.add_argument('--gridSizeX', help='number of grid slots in each row',default=6, type=int)
 parser.add_argument('--laneAngle', help='angle of the lane',default=90, type=int)
@@ -136,6 +139,7 @@ laneAngle = args.laneAngle
 goalSpotNumber = args.goalSpotNumber
 duration = args.duration
 saveGraphs = args.saveGraphs
+timeDelay = args.timeDelay
 
 # number of episodes times duration of each episode will give us the number of steps. Only needed for learning
 steps = episodes * duration
@@ -159,10 +163,10 @@ elif mode == 'phasedRun':
     env_phased_config = common_env_config.copy()
     env_phased_config['phasedLearning'] = True
     env.update_config(env_phased_config)
-    run_simulation(episodes,model_name, env)
+    run_simulation(episodes,model_name, env, timeDelay)
 else:
     env.update_config(common_env_config)
-    run_simulation(episodes, model_name, env)
+    run_simulation(episodes, model_name, env, timeDelay)
 
 env.terminate()
 
