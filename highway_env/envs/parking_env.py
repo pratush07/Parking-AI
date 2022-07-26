@@ -207,7 +207,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
                     net.add_lane("b", "c", StraightLane([x, -y_offset], [x, -y_offset-length], width=width, line_types=lt))
                 else:
                     # lane at angle
-                    print("Changing lane angle tp diagonal Shift " + str(diagonal_shift))
+                    print("Changing lane angle to diagonal Shift " + str(diagonal_shift))
                     net.add_lane("a", "b", StraightLane([x, y_offset], [x-diagonal_shift, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
                     net.add_lane("b", "c", StraightLane([x+diagonal_shift, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
 
