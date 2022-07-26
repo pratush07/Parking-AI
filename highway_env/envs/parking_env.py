@@ -368,8 +368,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
 
     # should be called at the end of simulation/learning manually.
     def terminate(self):
-        self.file_open_episode.close()
-        self.file_open_steps.close()
+        if self.file_open_episode and self.file_open_steps:
+            self.file_open_episode.close()
+            self.file_open_steps.close()
 
 class ParkingEnvActionRepeat(ParkingEnv):
     def __init__(self):
