@@ -169,6 +169,8 @@ elif mode == 'phasedRun':
 elif mode == 'run':
     env.update_config(common_env_config)
     run_simulation(episodes, model_name, env, timeDelay)
+else:
+    print('Mode not found!')
 
 env.terminate()
 
