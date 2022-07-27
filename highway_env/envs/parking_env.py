@@ -13,6 +13,7 @@ from highway_env.vehicle.objects import Landmark, Obstacle
 import math
 import csv
 from typing import Tuple
+import random
 
 class GoalEnv(Env):
     """
@@ -127,6 +128,8 @@ class ParkingEnv(AbstractEnv, GoalEnv):
             "goalSpotNumber": 2,  # fixing goal spot. None means random.
             "diagonalShift": 0, # diagonal shift magnitude towards clockwise direction
             "phasedLearning": False, # if true will enable phased learning with changing angles.
+            "randomLearning": False # if true will enable random learning with changing angles.
+
         })
         return config
     
@@ -194,13 +197,13 @@ class ParkingEnv(AbstractEnv, GoalEnv):
         x_offset = 0
         y_offset = self.config["corridorWidth"]
 
+        if self.config['randomLearning']:     
+            choice = random.randint(1,2)
+            diag_random = 0 if choice == 1 else diagonal_shift
+
         for k in range(spots):
             x = (k - spots // 2) * (width + x_offset) - width / 2
-            if not self.config['phasedLearning']:
-                # lane at diagonal shift 
-                net.add_lane("a", "b", StraightLane([x, y_offset], [x-diagonal_shift, y_offset+length], width=width, line_types=lt, align_lane_marking=(diagonal_shift!=0)))
-                net.add_lane("b", "c", StraightLane([x+diagonal_shift, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=(diagonal_shift!=0)))
-            else:
+            if self.config['phasedLearning']:
                 # while total steps are less than half of total steps..construct straight roads
                 if self.episode_ctr <= self.config["totalEpisodes"]/2:
                     net.add_lane("a", "b", StraightLane([x, y_offset], [x, y_offset+length], width=width, line_types=lt))
@@ -210,6 +213,13 @@ class ParkingEnv(AbstractEnv, GoalEnv):
                     print("Changing lane angle to diagonal Shift " + str(diagonal_shift))
                     net.add_lane("a", "b", StraightLane([x, y_offset], [x-diagonal_shift, y_offset+length], width=width, line_types=lt, align_lane_marking=True))
                     net.add_lane("b", "c", StraightLane([x+diagonal_shift, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=True))
+            elif self.config['randomLearning']:
+                net.add_lane("a", "b", StraightLane([x, y_offset], [x-diag_random, y_offset+length], width=width, line_types=lt, align_lane_marking=(diag_random!=0)))
+                net.add_lane("b", "c", StraightLane([x+diag_random, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=(diag_random!=0)))
+
+            else:
+                net.add_lane("a", "b", StraightLane([x, y_offset], [x-diagonal_shift, y_offset+length], width=width, line_types=lt, align_lane_marking=(diagonal_shift!=0)))
+                net.add_lane("b", "c", StraightLane([x+diagonal_shift, -y_offset], [x, -y_offset-length], width=width, line_types=lt, align_lane_marking=(diagonal_shift!=0)))
 
         self.road = Road(network=net,
                          np_random=self.np_random,

@@ -160,12 +160,27 @@ elif mode == 'phasedLearn':
     env.update_config(env_phased_config)
     run_and_save_model(steps, model_name,env,useHER)
 
+elif mode == 'randomLearn':
+    env_phased_config = common_env_config.copy()
+    env_phased_config['randomLearning'] = True
+    print("Running in random learn mode..")
+    env.update_config(env_phased_config)
+    run_and_save_model(steps, model_name,env,useHER)
+
 elif mode == 'phasedRun':
     env_phased_config = common_env_config.copy()
     env_phased_config['phasedLearning'] = True
     print("Running in phased run mode..")
     env.update_config(env_phased_config)
     run_simulation(episodes,model_name, env, timeDelay)
+
+elif mode == 'randomRun':
+    env_phased_config = common_env_config.copy()
+    env_phased_config['randomLearning'] = True
+    print("Running in random run mode..")
+    env.update_config(env_phased_config)
+    run_simulation(episodes,model_name, env, timeDelay)
+
 elif mode == 'run':
     env.update_config(common_env_config)
     run_simulation(episodes, model_name, env, timeDelay)
