@@ -27,7 +27,7 @@ def run_and_save_model(steps, model_name, env, useHER = True):
                     policy_kwargs=dict(net_arch=[512, 512, 512]))
     else:
         print("running without HER")
-        model = SAC('MultiInputPolicy', env,verbose=1, buffer_size=int(1e6),
+        model = SAC('MultiInputPolicy', env,verbose=1, buffer_size=0,
                     learning_rate=1e-3,
                     gamma=0.95, batch_size=1024, tau=0.05,
                     policy_kwargs=dict(net_arch=[512, 512, 512]))
