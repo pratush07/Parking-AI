@@ -113,6 +113,8 @@ parser.add_argument('--filename', help='name of the file if in learn mode', type
 parser.add_argument('--buffer', help='0 means no buffer. 1 means her, 2 means default buffer.',default=1, type=int)
 parser.add_argument('--saveGraphs',help='save graphs',default=1, type=int)
 parser.add_argument('--timeDelay',help='timeDelay during run',default=None, type=float)
+parser.add_argument('--parallelParking',help='Adds parallel parking',default=0, type=int)
+
 
 parser.add_argument('--gridSizeX', help='number of grid slots in each row',default=6, type=int)
 parser.add_argument('--diagonalShift', help='angle of the lane',default=0, type=int)
@@ -146,12 +148,17 @@ goalSpotNumber = args.goalSpotNumber
 duration = args.duration
 saveGraphs = args.saveGraphs
 timeDelay = args.timeDelay
+parallelParking = args.parallelParking
 
 # number of episodes times duration of each episode will give us the number of steps. Only needed for learning
 steps = episodes * duration
 print("\nTotal steps to be run is : " + str(steps))
 
 common_env_config = {"totalEpisodes": episodes, "diagonalShift": diagonalShift, "gridSizeX": gridSizeX, "goalSpotNumber": goalSpotNumber, "duration": duration}
+
+if parallelParking:
+    common_env_config["is_parallel_parking"] = True
+
 print("running with the following configurations..")
 print("####\n" + str(common_env_config) + str("\n ####"))
 
