@@ -15,19 +15,25 @@ plt.rc('font', size=18)
 plt.rcParams['figure.constrained_layout.use'] = True
 
 
-def run_and_save_model(steps, model_name, env, useHER = True):
+def run_and_save_model(steps, model_name, env, useBuffer = 1):
     her_kwargs = dict(n_sampled_goal=4, goal_selection_strategy='future', online_sampling=True, max_episode_length=100)
     # if we want to use HER for training
-    if useHER:
+    if useBuffer == 1:
         print("running with HER")
         model = SAC('MultiInputPolicy', env, replay_buffer_class=HerReplayBuffer,
                     replay_buffer_kwargs=her_kwargs, verbose=1, buffer_size=int(1e6),
                     learning_rate=1e-3,
                     gamma=0.95, batch_size=1024, tau=0.05,
                     policy_kwargs=dict(net_arch=[512, 512, 512]))
-    else:
+    elif useBuffer == 2:
         print("running without HER")
         model = SAC('MultiInputPolicy', env,verbose=1, buffer_size=int(1e6),
+                    learning_rate=1e-3,
+                    gamma=0.95, batch_size=1024, tau=0.05,
+                    policy_kwargs=dict(net_arch=[512, 512, 512]))
+    elif useBuffer == 0:
+        print("running with zero buffer")
+        model = SAC('MultiInputPolicy', env,verbose=1, buffer_size=0,
                     learning_rate=1e-3,
                     gamma=0.95, batch_size=1024, tau=0.05,
                     policy_kwargs=dict(net_arch=[512, 512, 512]))
@@ -104,7 +110,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--mode', help='learn/run', type=str)
 parser.add_argument('--episodes', help='episodes to learn/run', type=int)
 parser.add_argument('--filename', help='name of the file if in learn mode', type=str)
-parser.add_argument('--her', help='Use HER',default=1, type=int)
+parser.add_argument('--buffer', help='0 means no buffer. 1 means her, 2 means default buffer.',default=1, type=int)
 parser.add_argument('--saveGraphs',help='save graphs',default=1, type=int)
 parser.add_argument('--timeDelay',help='timeDelay during run',default=None, type=float)
 
@@ -133,7 +139,7 @@ if args.episodes == None:
 else:
     episodes = args.episodes
 
-useHER = args.her
+useBuffer = args.buffer
 gridSizeX = args.gridSizeX
 diagonalShift = args.diagonalShift
 goalSpotNumber = args.goalSpotNumber
@@ -151,21 +157,21 @@ print("####\n" + str(common_env_config) + str("\n ####"))
 
 if mode == 'learn':
     env.update_config(common_env_config)
-    run_and_save_model(steps, model_name,env,useHER)
+    run_and_save_model(steps, model_name,env,useBuffer)
 
 elif mode == 'phasedLearn':
     env_phased_config = common_env_config.copy()
     env_phased_config['phasedLearning'] = True
     print("Running in phased learn mode..")
     env.update_config(env_phased_config)
-    run_and_save_model(steps, model_name,env,useHER)
+    run_and_save_model(steps, model_name,env,useBuffer)
 
 elif mode == 'randomLearn':
     env_phased_config = common_env_config.copy()
     env_phased_config['randomLearning'] = True
     print("Running in random learn mode..")
     env.update_config(env_phased_config)
-    run_and_save_model(steps, model_name,env,useHER)
+    run_and_save_model(steps, model_name,env,useBuffer)
 
 elif mode == 'phasedRun':
     env_phased_config = common_env_config.copy()
