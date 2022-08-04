@@ -246,9 +246,9 @@ class ParkingEnv(AbstractEnv, GoalEnv):
                     # else we want a parallel slot
                     else:
                         x_offset = 1
-                        x = (k - spots // 2) * (length + x_offset)
-                        net.add_lane("a", "b", StraightLane([x, y_offset], [x+length, y_offset], width=width, line_types=lt))
-                        net.add_lane("b", "c", StraightLane([x+length, -y_offset], [x, -y_offset], width=width, line_types=lt))       
+                        x = (k - spots // 2) * (length + x_offset) + length / 2
+                        net.add_lane("a", "b", StraightLane([x, y_offset], [x-length, y_offset], width=width, line_types=lt))
+                        net.add_lane("b", "c", StraightLane([x-length, -y_offset], [x, -y_offset], width=width, line_types=lt))            
 
                 else:
                     x_offset = 1
