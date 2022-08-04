@@ -67,8 +67,6 @@ def plot_graphs():
     ax.plot(df_carshed['episodes'], df_carshed['rewards'], marker='o',markerfacecolor="red",linestyle = 'None',markersize=8)
     ax.plot(df_success['episodes'], df_success['rewards'], marker='o',markerfacecolor="green",linestyle = 'None',markersize=8)
 
-    ax.plot(df['episodes'], df['rewards'],color='blue')
-
     plt.legend(["Elapsed", "Crashed", "Success"])
 
     plt.title("Total Rewards vs Episodes", fontsize=16)
