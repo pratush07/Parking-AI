@@ -102,7 +102,7 @@ class ParkingEnv(AbstractEnv, GoalEnv):
                 "type": "ContinuousAction"
             },
             "reward_weights": [1, 0.3, 0, 0, 0.02, 0.02],
-            "success_goal_reward": 0.10,
+            "success_goal_reward": 0.08,
             "collision_reward": -4,
             "future_collision_reward": 0,
             "steering_range": np.deg2rad(45),
