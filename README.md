@@ -47,14 +47,21 @@ python park_model.py --mode learn --episodes 100 --filename sac_diag --goalSpotN
 ```
 
 ## Simulation
-1. To perform a simulation in an vertical slots environment using a trained agent, use the command below.
+1. To perform a simulation in different lane orientations using a trained agent, use the commands below.
+Vertical
 ```
 python park_model.py --mode run --episodes 30 --filename sac_straight --goalSpotNumber 2
 ```
-![vertical-slot](https://github.com/pratush07/Parking-AI/blob/1270c035f0bbd639924e62e904a549767aea4274/scenarios/gifs/diagonal.gif)
+![vertical-slot](https://github.com/pratush07/Parking-AI/blob/1270c035f0bbd639924e62e904a549767aea4274/scenarios/gifs/vertical.gif)
 
+Diagonal
+```
+python park_model.py --mode run --episodes 30 --filename sac_diagonal --goalSpotNumber 2 --diagonalShift 6
+```
+![diagonal-slot](https://github.com/pratush07/Parking-AI/blob/1270c035f0bbd639924e62e904a549767aea4274/scenarios/gifs/diagonal.gif)
 
-2. To perform a simulation in an vertical slots environment using a trained agent, use the command below.
+Parallel
 ```
-python park_model.py --mode run --episodes 30 --filename sac_straight --goalSpotNumber 2 --diagonalShift 6
+python park_model.py --mode run --episodes 30 --filename sac_parallel --goalSpotNumber 2 --parallelParking 1
 ```
+![diagonal-slot](https://github.com/pratush07/Parking-AI/blob/1270c035f0bbd639924e62e904a549767aea4274/scenarios/gifs/parallel.gif)
