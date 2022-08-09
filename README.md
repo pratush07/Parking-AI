@@ -34,17 +34,23 @@ pip install -r requirements.txt
 ## Training
 We will use the file park_model.py to perform our training.
 
-1. To perform the training for a vertical slots for goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal. After the training ends, we will have a model faved by the name sac_straight_steps_timestamp.
+1. To perform the training for different lane orientations for goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal. After the training ends, we will have a model faved by the name filename.
 
+Vertical
 ```
 python park_model.py --mode learn --episodes 100 --filename sac_straight --goalSpotNumber 2
 ```
 
-2. To perform the training for a diagonal slots for goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal. After the training ends, we will have a model faved by the name sac_diag_steps_timestamp.
-
+Diagonal
 ```
 python park_model.py --mode learn --episodes 100 --filename sac_diag --goalSpotNumber 2 --diagonalShift 6
 ```
+
+Parallel
+```
+python park_model.py --mode learn --episodes 100 --filename sac_parallel --goalSpotNumber 2 --parallelParking 1
+```
+
 
 ## Simulation
 1. To perform a simulation in different lane orientations using a trained agent, use the commands below.
