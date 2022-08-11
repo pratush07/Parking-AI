@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ## Training
 We will use the file park_model.py to perform our training.
 
-1. To perform the training for different lane orientations for goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal. After the training ends, we will have a model faved by the name filename.
+1. To perform the training for different lane orientations to park in the  goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal. After the training ends, we will have a model faved by the name filename.
 
 Vertical
 ```
@@ -51,8 +51,24 @@ Parallel
 python park_model.py --mode learn --episodes 100 --filename sac_parallel --goalSpotNumber 2 --parallelParking 1
 ```
 
+2. To perform the phased training for 2 lane orientations, that is vertical and diagonal, to park in goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal.
+```
+python park_model.py --mode phasedLearn --episodes 100 --filename sac_phased --goalSpotNumber 2 --diagonalShift 6
+```
+
+3. To perform the random training for 2 lane orientations to park in the goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal.
+```
+python park_model.py --mode randomLearn --episodes 100 --filename sac_random --goalSpotNumber 2 --diagonalShift 6
+```
+
+4. To perform the random training same as previous but now with parallel parking to park in the goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal.
+```
+python park_model.py --mode randomLearn --episodes 100 --filename sac_random --goalSpotNumber 2 --diagonalShift 6 --parallelParking 1
+```
 
 ## Simulation
+We will use the file park_model.py to perform our simulation.
+
 1. To perform a simulation in different lane orientations using a trained agent, use the commands below.
 Vertical
 ```
@@ -71,3 +87,21 @@ Parallel
 python park_model.py --mode run --episodes 30 --filename sac_parallel --goalSpotNumber 2 --parallelParking 1
 ```
 ![diagonal-slot](https://github.com/pratush07/Parking-AI/blob/1270c035f0bbd639924e62e904a549767aea4274/scenarios/gifs/parallel.gif)
+
+2. To perform the phased simulation for 2 lane orientations to park in goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal.
+```
+python park_model.py --mode phasedRun --episodes 100 --filename sac_phased --goalSpotNumber 2 --diagonalShift 6
+```
+
+3. To perform the random simulation for 2 lane orientations to park in the goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal.
+```
+python park_model.py --mode randomRun --episodes 100 --filename sac_random --goalSpotNumber 2 --diagonalShift 6
+```
+
+4. To perform the random simulation for 3 lane orientation to park in the goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal.
+```
+python park_model.py --mode randomRun --episodes 100 --filename sac_random --goalSpotNumber 2 --diagonalShift 6 --parallelParking 1
+```
+
+## Commandline Arguments Table
+![args-table](https://github.com/pratush07/Parking-AI/blob/1270c035f0bbd639924e62e904a549767aea4274/scenarios/args_table.png)
