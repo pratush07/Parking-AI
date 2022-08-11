@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ## Training
 We will use the file park_model.py to perform our training.
 
-1. To perform the training for different lane orientations to park in the  goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal. After the training ends, we will have a model faved by the name filename.
+1. To perform the training for different lane orientations to park in the  goal slot indexed at 2 for 100 episodes, the command below can be executed in the terminal. After the training ends, we will have a model saved by the name filename.
 
 Vertical
 ```
