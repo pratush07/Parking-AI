@@ -108,6 +108,6 @@ Refer this section for all the commandline arguments.
 ![args-table](https://github.com/pratush07/Parking-AI/blob/c6190f6c0b4061432f76cdb5b27cc217359f3a03/scenarios/args_table.png)
 
 ## References
-https://github.com/eleurent/highway-env
-https://github.com/DinisMoreira/Dissert
+https://github.com/eleurent/highway-env <br>
+https://github.com/DinisMoreira/Dissert <br>
 https://stable-baselines3.readthedocs.io/en/master/
