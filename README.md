@@ -104,4 +104,4 @@ python park_model.py --mode randomRun --episodes 100 --filename sac_random --goa
 ```
 
 ## Commandline Arguments Table
-![args-table](https://github.com/pratush07/Parking-AI/blob/1270c035f0bbd639924e62e904a549767aea4274/scenarios/args_table.png)
+![args-table](https://github.com/pratush07/Parking-AI/blob/c6190f6c0b4061432f76cdb5b27cc217359f3a03/scenarios/args_table.png)
