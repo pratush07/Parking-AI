@@ -1,6 +1,6 @@
 # Autonomous Parking using Reinforcement Learning
 
-This repo contains the code for the dissertation titled "Autonomous Parking using Reinforcement Learning".
+This repo contains the code for the dissertation titled "Evaluation of Soft Actor Critic In Diverse Parking Environments".
 
 ## Folder Structure
 ```bash
